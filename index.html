@@ -29,7 +29,9 @@
   </div>
   <script>
     function doDecrypt() {
-      const token = document.getElementById('encrypted').value.trim();
+      // grab the token and remove every whitespace char so Fernet.js sees a clean one‑liner
+      let token = document.getElementById('encrypted').value;
+      token = token.replace(/\s+/g, "");
       const pwd   = document.getElementById('password').value;
       const out   = document.getElementById('output');
       try {
