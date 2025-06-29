@@ -3,134 +3,182 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mẹ Calculator</title>
+  <title>Mẹ's Calculator – Glow Edition</title>
   <style>
+    :root {
+      --bg: #0e0f10;
+      --fg: #e8f6ff;
+      --accent: #00e0ff;
+      --btn-bg: #1d1f22;
+      --btn-hover: #00e0ff22;
+      --radius: 1rem;
+      --shadow: 0 8px 25px rgba(0,224,255,0.15);
+    }
+    * { box-sizing: border-box; }
     body {
-      background: #121212;
-      color: #f0f0f0;
-      font-family: 'Courier New', monospace;
+      margin: 0;
+      min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      padding: 2rem;
+      justify-content: center;
+      background: linear-gradient(145deg, #04131b 0%, #101215 100%);
+      color: var(--fg);
+      font-family: "Fira Code", monospace;
+    }
+    h1 {
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+      text-shadow: 0 0 8px #00e0ff66;
+      letter-spacing: 0.05em;
     }
     .calculator {
-      background: #1e1e1e;
-      padding: 1rem;
-      border-radius: 1rem;
-      box-shadow: 0 0 20px rgba(255,255,255,0.1);
-      width: 320px;
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      width: clamp(280px, 90vw, 340px);
+      backdrop-filter: blur(10px);
+      border: 1px solid #00e0ff33;
     }
     #display {
       width: 100%;
-      padding: 1rem;
-      font-size: 1.5rem;
-      background: #333;
+      height: 3.5rem;
+      background: #000c11;
       border: none;
-      color: #fff;
-      text-align: right;
+      border-radius: calc(var(--radius)/2);
       margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      font-size: 1.5rem;
+      text-align: right;
+      color: var(--accent);
+      box-shadow: inset 0 0 8px #00e0ff33;
     }
-    .buttons button {
-      width: 23%;
-      margin: 1%;
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+    }
+    button {
+      height: 3rem;
       font-size: 1.2rem;
-      padding: 0.75rem;
-      background: #2a2a2a;
-      color: #fff;
+      font-weight: 500;
+      color: var(--fg);
+      background: var(--btn-bg);
       border: none;
-      border-radius: 0.5rem;
+      border-radius: calc(var(--radius)/2);
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.4);
     }
-    .hidden {
-      display: none;
-      margin-top: 2rem;
+    button:hover {
+      background: var(--btn-hover);
+      box-shadow: 0 0 8px #00e0ff55;
+      color: var(--accent);
+    }
+    /* Hidden decrypt area */
+    #unlockArea.hidden { display: none; }
+    #unlockArea {
+      margin-top: 1.5rem;
+      animation: fadeIn 0.6s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: none; }
     }
     textarea, input[type=password] {
       width: 100%;
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      font-family: monospace;
+      margin-bottom: 0.75rem;
+      padding: 0.6rem;
+      border: none;
+      border-radius: calc(var(--radius)/3);
+      background: #001018;
+      color: var(--fg);
+      font-family: "Fira Code", monospace;
     }
     #decryptedKey {
-      background: #222;
-      color: #0f0;
+      white-space: pre-wrap;
+      background: #03151c;
       padding: 1rem;
-      border-radius: 0.5rem;
-      font-family: monospace;
+      border-radius: calc(var(--radius)/3);
+      color: #00ff9c;
+      box-shadow: inset 0 0 6px #00ff9c55;
     }
+    .cta {
+      display: inline-block;
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow: 0 0 12px #00e0ffaa;
+      transition: transform 0.15s;
+    }
+    .cta:hover { transform: translateY(-2px); }
   </style>
 </head>
 <body>
-  <h2>Mẹ's Calculator</h2>
+  <h1>Mẹ's Calculator</h1>
   <div class="calculator">
     <input id="display" disabled />
-    <div class="buttons">
-      <button onclick="append('1')">1</button>
-      <button onclick="append('2')">2</button>
-      <button onclick="append('3')">3</button>
-      <button onclick="append('+')">+</button><br>
-      <button onclick="append('4')">4</button>
-      <button onclick="append('5')">5</button>
-      <button onclick="append('6')">6</button>
-      <button onclick="append('-')">-</button><br>
+    <div class="btn-grid">
       <button onclick="append('7')">7</button>
       <button onclick="append('8')">8</button>
       <button onclick="append('9')">9</button>
-      <button onclick="append('*')">*</button><br>
+      <button onclick="append('/')">÷</button>
+
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('*')">×</button>
+
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="append('-')">−</button>
+
       <button onclick="append('0')">0</button>
       <button onclick="append('.')">.</button>
-      <button onclick="calculate()">=</button>
       <button onclick="clearDisplay()">C</button>
+      <button onclick="append('+')">+</button>
+
+      <button style="grid-column:1/5; height:3rem;" onclick="calculate()">=</button>
+    </div>
+
+    <div id="unlockArea" class="hidden">
+      <h3>🔐 Decrypt Encrypted Key</h3>
+      <textarea id="encrypted" rows="3" placeholder="Paste encrypted string here..."></textarea>
+      <input type="password" id="password" placeholder="Enter password" />
+      <button class="cta" onclick="decrypt()">Giải mã</button>
+      <pre id="decryptedKey"></pre>
     </div>
   </div>
 
-  <div id="unlockArea" class="hidden">
-    <h3>🔐 Decrypt Encrypted Key</h3>
-    <textarea id="encrypted" placeholder="Paste encrypted string here..."></textarea>
-    <input type="password" id="password" placeholder="Enter password" />
-    <button onclick="decrypt()">Giải mã</button>
-    <pre id="decryptedKey"></pre>
-  </div>
-
-  <script>
-    let display = document.getElementById('display');
-    let code = '';
-    function append(val) {
-      code += val;
+<script>
+  const display = document.getElementById('display');
+  let code = '';
+  document.addEventListener('keydown', e => {
+    if (e.key.length === 1 || e.key === 'Backspace') {
+      code = e.key === 'Backspace' ? code.slice(0, -1) : code + e.key;
       display.value = code;
     }
-    function calculate() {
-      if (code === 'mehethohanroi=') {
-        document.getElementById('unlockArea').classList.remove('hidden');
-        display.value = '🎉 Mẹ tự do rồi!';
-      } else {
-        try {
-          display.value = eval(code);
-        } catch {
-          display.value = 'ERR';
-        }
-      }
+    if (e.key === 'Enter') calculate();
+  });
+  function append(v) { code += v; display.value = code; }
+  function clearDisplay() { code = ''; display.value = ''; }
+  function calculate() {
+    if (code === 'mehethohanroi=') {
+      document.getElementById('unlockArea').classList.remove('hidden');
+      display.value = '🎉 Mẹ tự do rồi!';
+    } else {
+      try { display.value = eval(code); } catch { display.value = 'ERR'; }
     }
-    function clearDisplay() {
-      code = '';
-      display.value = '';
-    }
-
-    function decrypt() {
-      const encrypted = document.getElementById('encrypted').value.trim();
-      const password = document.getElementById('password').value.trim();
-      try {
-        const key = window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(password)).then(rawKey => {
-          const hashed = btoa(String.fromCharCode(...new Uint8Array(rawKey))).slice(0, 32);
-          const fernetKey = hashed.padEnd(32, '0');
-          // This is a fake placeholder. Real decryption requires a backend or external lib like fernet.js
-          document.getElementById('decryptedKey').innerText = '🔓 ' + atob(encrypted);
-        });
-      } catch (err) {
-        document.getElementById('decryptedKey').innerText = '❌ Decryption failed.';
-      }
-    }
-  </script>
+  }
+  function decrypt() {
+    const enc = document.getElementById('encrypted').value.trim();
+    try { document.getElementById('decryptedKey').textContent = '🔓 ' + atob(enc); }
+    catch { document.getElementById('decryptedKey').textContent = '❌ Decryption failed.'; }
+  }
+</script>
 </body>
 </html>
