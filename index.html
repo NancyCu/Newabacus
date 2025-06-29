@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+  <!-- CryptoJS for SHA-256 key derivation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <!-- Fernet.js for token decoding -->
+  <script src="https://unpkg.com/fernet@0.2.0/dist/fernet.min.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mẹ's Calculator – Glow Edition</title>
@@ -175,9 +179,21 @@
     }
   }
   function decrypt() {
-    const enc = document.getElementById('encrypted').value.trim();
-    try { document.getElementById('decryptedKey').textContent = '🔓 ' + atob(enc); }
-    catch { document.getElementById('decryptedKey').textContent = '❌ Decryption failed.'; }
+    const token  = document.getElementById('encrypted').value.trim();
+    const pwd    = document.getElementById('password').value;
+    
+    // Derive the 256-bit key: SHA-256 of password, then Base64
+    const sha256 = CryptoJS.SHA256(pwd);
+    const key64  = CryptoJS.enc.Base64.stringify(sha256);
+
+    try {
+      const secret = new fernet.Secret(key64);
+      const ftoken = new fernet.Token({ secret: secret, token: token, ttl: 0 });
+      const message = ftoken.decode();
+      document.getElementById('decryptedKey').textContent = '🔓 ' + message;
+    } catch {
+      document.getElementById('decryptedKey').textContent = '❌ Decryption failed.';
+    }
   }
 </script>
 </body>
