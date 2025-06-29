@@ -162,11 +162,19 @@
   const display = document.getElementById('display');
   let code = '';
   document.addEventListener('keydown', e => {
+    // Only handle keys for calculator when display is focused
+    const active = document.activeElement;
+    if (active !== display) return;
+
     if (e.key.length === 1 || e.key === 'Backspace') {
+      e.preventDefault();
       code = e.key === 'Backspace' ? code.slice(0, -1) : code + e.key;
       display.value = code;
     }
-    if (e.key === 'Enter') calculate();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      calculate();
+    }
   });
   function append(v) { code += v; display.value = code; }
   function clearDisplay() { code = ''; display.value = ''; }
