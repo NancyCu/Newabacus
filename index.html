@@ -1,132 +1,76 @@
-
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mẹ Calculator</title>
-  <style>
-    body {
-      background: #121212;
-      color: #f0f0f0;
-      font-family: 'Courier New', monospace;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 2rem;
-    }
-    .calculator {
-      background: #1e1e1e;
-      padding: 1rem;
-      border-radius: 1rem;
-      box-shadow: 0 0 20px rgba(255,255,255,0.1);
-      width: 320px;
-    }
-    #display {
-      width: 100%;
-      padding: 1rem;
-      font-size: 1.5rem;
-      background: #333;
-      border: none;
-      color: #fff;
-      text-align: right;
-      margin-bottom: 1rem;
-    }
-    .buttons button {
-      width: 23%;
-      margin: 1%;
-      font-size: 1.2rem;
-      padding: 0.75rem;
-      background: #2a2a2a;
-      color: #fff;
-      border: none;
-      border-radius: 0.5rem;
-    }
-    .hidden {
-      display: none;
-      margin-top: 2rem;
-    }
-    textarea, input[type=password] {
-      width: 100%;
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      font-family: monospace;
-    }
-    #decryptedKey {
-      background: #222;
-      color: #0f0;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      font-family: monospace;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mẹ Calculator</title>
+<style>
+  body{background:#121212;color:#f0f0f0;font-family:Courier New,monospace;display:flex;flex-direction:column;align-items:center;padding:2rem}
+  .calculator{background:#1e1e1e;padding:1rem;border-radius:1rem;box-shadow:0 0 20px rgba(255,255,255,.1);width:320px}
+  #display{width:100%;padding:1rem;font-size:1.5rem;background:#333;color:#fff;border:none;text-align:right;margin-bottom:1rem}
+  .buttons button{width:23%;margin:1%;font-size:1.2rem;padding:.75rem;background:#2a2a2a;color:#fff;border:none;border-radius:.5rem}
+  .hidden{display:none;margin-top:2rem}
+  textarea,input[type=password]{width:100%;margin-bottom:1rem;padding:.5rem;font-family:monospace}
+  #decryptedKey{background:#222;color:#0f0;padding:1rem;border-radius:.5rem;font-family:monospace}
+</style>
 </head>
 <body>
-  <h2>Mẹ's Calculator</h2>
-  <div class="calculator">
-    <input id="display" disabled />
-    <div class="buttons">
-      <button onclick="append('1')">1</button>
-      <button onclick="append('2')">2</button>
-      <button onclick="append('3')">3</button>
-      <button onclick="append('+')">+</button><br>
-      <button onclick="append('4')">4</button>
-      <button onclick="append('5')">5</button>
-      <button onclick="append('6')">6</button>
-      <button onclick="append('-')">-</button><br>
-      <button onclick="append('7')">7</button>
-      <button onclick="append('8')">8</button>
-      <button onclick="append('9')">9</button>
-      <button onclick="append('*')">*</button><br>
-      <button onclick="append('0')">0</button>
-      <button onclick="append('.')">.</button>
-      <button onclick="calculate()">=</button>
-      <button onclick="clearDisplay()">C</button>
-    </div>
+<h2>Mẹ's Calculator</h2>
+<div class="calculator">
+  <input id="display" disabled>
+  <div class="buttons">
+    <button onclick="append('7')">7</button>
+    <button onclick="append('8')">8</button>
+    <button onclick="append('9')">9</button>
+    <button onclick="append('+')">+</button><br>
+    <button onclick="append('4')">4</button>
+    <button onclick="append('5')">5</button>
+    <button onclick="append('6')">6</button>
+    <button onclick="append('-')">-</button><br>
+    <button onclick="append('1')">1</button>
+    <button onclick="append('2')">2</button>
+    <button onclick="append('3')">3</button>
+    <button onclick="append('*')">*</button><br>
+    <button onclick="append('0')">0</button>
+    <button onclick="append('.')">.</button>
+    <button onclick="calculate()">=</button>
+    <button onclick="clearDisplay()">C</button>
   </div>
+</div>
 
-  <div id="unlockArea" class="hidden">
-    <h3>🔐 Decrypt Encrypted Key</h3>
-    <textarea id="encrypted" placeholder="Paste encrypted string here..."></textarea>
-    <input type="password" id="password" placeholder="Enter password" />
-    <button onclick="decrypt()">Giải mã</button>
-    <pre id="decryptedKey"></pre>
-  </div>
+<div id="unlockArea" class="hidden">
+  <h3>🔐 Decrypt Encrypted Key</h3>
+  <textarea id="encrypted" placeholder="Paste encrypted string here..."></textarea>
+  <input type="password" id="password" placeholder="Enter password">
+  <button onclick="decrypt()">Giải mã</button>
+  <pre id="decryptedKey"></pre>
+</div>
 
-  <script>
-    let display = document.getElementById('display');
-    let code = '';
-    function append(val) {
-      code += val;
-      display.value = code;
-    }
-    function calculate() {
-      if (code === 'mehethohanroi=') {
-        document.getElementById('unlockArea').classList.remove('hidden');
-        display.value = '🎉 Mẹ tự do rồi!';
-      } else {
-        try {
-          display.value = eval(code);
-        } catch {
-          display.value = 'ERR';
-        }
-      }
-    }
-    function clearDisplay() {
-      code = '';
-      display.value = '';
-    }
-
-    function decrypt() {
-      const encrypted = document.getElementById('encrypted').value.trim();
-      const password = document.getElementById('password').value.trim();
-      try {
-        document.getElementById('decryptedKey').innerText = '🔓 ' + atob(encrypted);
-      } catch (err) {
-        document.getElementById('decryptedKey').innerText = '❌ Decryption failed.';
-      }
-    }
-  </script>
+<script>
+let display=document.getElementById('display');
+let code='';
+document.addEventListener('keydown',e=>{
+  if(e.key.length===1||e.key==='Backspace'){
+    code=e.key==='Backspace'?code.slice(0,-1):code+e.key;
+    display.value=code;
+  }
+  if(e.key==='Enter')calculate();
+});
+function append(v){code+=v;display.value=code}
+function calculate(){
+  if(code==='mehethohanroi='){
+    document.getElementById('unlockArea').classList.remove('hidden');
+    display.value='🎉 Mẹ tự do rồi!';
+  }else{
+    try{display.value=eval(code)}catch{display.value='ERR'}
+  }
+}
+function clearDisplay(){code='';display.value=''}
+function decrypt(){
+  const enc=document.getElementById('encrypted').value.trim();
+  try{document.getElementById('decryptedKey').innerText='🔓 '+atob(enc);}
+  catch{document.getElementById('decryptedKey').innerText='❌ Decryption failed.';}
+}
+</script>
 </body>
 </html>
