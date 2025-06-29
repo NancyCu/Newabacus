@@ -1,208 +1,50 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <!-- CryptoJS for SHA-256 key derivation -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mẹ's Decrypt Tool</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <!-- Fernet.js for token decoding -->
   <script src="https://unpkg.com/fernet@0.2.0/dist/fernet.min.js"></script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mẹ's Calculator – Glow Edition</title>
   <style>
-    :root {
-      --bg: #0e0f10;
-      --fg: #e8f6ff;
-      --accent: #00e0ff;
-      --btn-bg: #1d1f22;
-      --btn-hover: #00e0ff22;
-      --radius: 1rem;
-      --shadow: 0 8px 25px rgba(0,224,255,0.15);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(145deg, #04131b 0%, #101215 100%);
-      color: var(--fg);
-      font-family: "Fira Code", monospace;
-    }
-    h1 {
-      margin-bottom: 1.5rem;
-      color: var(--accent);
-      text-shadow: 0 0 8px #00e0ff66;
-      letter-spacing: 0.05em;
-    }
-    .calculator {
-      background: var(--bg);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      box-shadow: var(--shadow);
-      width: clamp(280px, 90vw, 340px);
-      backdrop-filter: blur(10px);
-      border: 1px solid #00e0ff33;
-    }
-    #display {
-      width: 100%;
-      height: 3.5rem;
-      background: #000c11;
-      border: none;
-      border-radius: calc(var(--radius)/2);
-      margin-bottom: 1rem;
-      padding: 0.75rem 1rem;
-      font-size: 1.5rem;
-      text-align: right;
-      color: var(--accent);
-      box-shadow: inset 0 0 8px #00e0ff33;
-    }
-    .btn-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.5rem;
-    }
-    button {
-      height: 3rem;
-      font-size: 1.2rem;
-      font-weight: 500;
-      color: var(--fg);
-      background: var(--btn-bg);
-      border: none;
-      border-radius: calc(var(--radius)/2);
-      cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.4);
-    }
-    button:hover {
-      background: var(--btn-hover);
-      box-shadow: 0 0 8px #00e0ff55;
-      color: var(--accent);
-    }
-    /* Hidden decrypt area */
-    #unlockArea.hidden { display: none; }
-    #unlockArea {
-      margin-top: 1.5rem;
-      animation: fadeIn 0.6s ease forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: none; }
-    }
-    textarea, input[type=password] {
-      width: 100%;
-      margin-bottom: 0.75rem;
-      padding: 0.6rem;
-      border: none;
-      border-radius: calc(var(--radius)/3);
-      background: #001018;
-      color: var(--fg);
-      font-family: "Fira Code", monospace;
-    }
-    #decryptedKey {
-      white-space: pre-wrap;
-      background: #03151c;
-      padding: 1rem;
-      border-radius: calc(var(--radius)/3);
-      color: #00ff9c;
-      box-shadow: inset 0 0 6px #00ff9c55;
-    }
-    .cta {
-      display: inline-block;
-      background: var(--accent);
-      color: #000;
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-      border-radius: 9999px;
-      cursor: pointer;
-      box-shadow: 0 0 12px #00e0ffaa;
-      transition: transform 0.15s;
-    }
-    .cta:hover { transform: translateY(-2px); }
+    body { display:flex; align-items:center; justify-content:center; height:100vh; background:#121212; color:#e8f6ff; font-family:sans-serif; margin:0; }
+    .container { background:#1e1e1e; padding:2rem; border-radius:1rem; width:90%; max-width:400px; box-shadow:0 0 20px rgba(0,224,255,0.2); }
+    h1 { text-align:center; margin-bottom:1rem; }
+    label { display:block; margin-top:1rem; font-weight:bold; }
+    textarea, input { width:100%; padding:0.75rem; margin-top:0.5rem; border:none; border-radius:0.5rem; background:#000c11; color:#e8f6ff; }
+    button { margin-top:1.5rem; width:100%; padding:0.75rem; background:#00e0ff; border:none; border-radius:0.5rem; font-size:1rem; cursor:pointer; }
+    pre { background:#03151c; padding:1rem; border-radius:0.5rem; margin-top:1rem; color:#00ff9c; white-space:pre-wrap; }
+    .error { color:#ff4c4c; }
   </style>
 </head>
 <body>
-  <h1>Mẹ's Calculator</h1>
-  <div class="calculator">
-    <input id="display" readonly tabindex="0" />
-    <div class="btn-grid">
-      <button onclick="append('7')">7</button>
-      <button onclick="append('8')">8</button>
-      <button onclick="append('9')">9</button>
-      <button onclick="append('/')">÷</button>
-
-      <button onclick="append('4')">4</button>
-      <button onclick="append('5')">5</button>
-      <button onclick="append('6')">6</button>
-      <button onclick="append('*')">×</button>
-
-      <button onclick="append('1')">1</button>
-      <button onclick="append('2')">2</button>
-      <button onclick="append('3')">3</button>
-      <button onclick="append('-')">−</button>
-
-      <button onclick="append('0')">0</button>
-      <button onclick="append('.')">.</button>
-      <button onclick="clearDisplay()">C</button>
-      <button onclick="append('+')">+</button>
-
-      <button style="grid-column:1/5; height:3rem;" onclick="calculate()">=</button>
-    </div>
-
-    <div id="unlockArea" class="hidden">
-      <h3>🔐 Decrypt Encrypted Key</h3>
-      <textarea id="encrypted" rows="3" placeholder="Paste encrypted string here..."></textarea>
-      <input type="password" id="password" placeholder="Enter password" />
-      <button class="cta" onclick="decrypt()">Giải mã</button>
-      <pre id="decryptedKey"></pre>
-    </div>
+  <div class="container">
+    <h1>Mẹ's Decrypt</h1>
+    <label for="encrypted">Encrypted String</label>
+    <textarea id="encrypted" rows="4" placeholder="Paste Fernet token here..."></textarea>
+    <label for="password">Password</label>
+    <input id="password" type="password" placeholder="mehethohanroi=" />
+    <button onclick="doDecrypt()">Giải mã</button>
+    <pre id="output"></pre>
   </div>
-
-<script>
-  const display = document.getElementById('display');
-  let code = '';
-  document.addEventListener('keydown', e => {
-    // Only handle keys for calculator when display is focused
-    const active = document.activeElement;
-    if (active !== display) return;
-
-    if (e.key.length === 1 || e.key === 'Backspace') {
-      e.preventDefault();
-      code = e.key === 'Backspace' ? code.slice(0, -1) : code + e.key;
-      display.value = code;
+  <script>
+    function doDecrypt() {
+      const token = document.getElementById('encrypted').value.trim();
+      const pwd   = document.getElementById('password').value;
+      const out   = document.getElementById('output');
+      try {
+        const sha   = CryptoJS.SHA256(pwd);
+        const key64 = CryptoJS.enc.Base64.stringify(sha);
+        const secret = new fernet.Secret(key64);
+        const ftoken = new fernet.Token({ secret: secret, token: token, ttl: 0 });
+        const msg = ftoken.decode();
+        out.textContent = '🔓 ' + msg;
+        out.classList.remove('error');
+      } catch (err) {
+        out.textContent = '❌ Decryption failed.';
+        out.classList.add('error');
+      }
     }
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      calculate();
-    }
-  });
-  function append(v) { code += v; display.value = code; }
-  function clearDisplay() { code = ''; display.value = ''; }
-  function calculate() {
-    if (code === 'mehethohanroi=') {
-      document.getElementById('unlockArea').classList.remove('hidden');
-      display.value = '🎉 Mẹ tự do rồi!';
-    } else {
-      try { display.value = eval(code); } catch { display.value = 'ERR'; }
-    }
-  }
-  function decrypt() {
-    const token  = document.getElementById('encrypted').value.trim();
-    const pwd    = document.getElementById('password').value;
-    
-    // Derive the 256-bit key: SHA-256 of password, then Base64
-    const sha256 = CryptoJS.SHA256(pwd);
-    const key64  = CryptoJS.enc.Base64.stringify(sha256);
-
-    try {
-      const secret = new fernet.Secret(key64);
-      const ftoken = new fernet.Token({ secret: secret, token: token, ttl: 0 });
-      const message = ftoken.decode();
-      document.getElementById('decryptedKey').textContent = '🔓 ' + message;
-    } catch {
-      document.getElementById('decryptedKey').textContent = '❌ Decryption failed.';
-    }
-  }
-</script>
+  </script>
 </body>
 </html>
