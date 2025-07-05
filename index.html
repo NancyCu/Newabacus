@@ -13,6 +13,8 @@
     label { display:block; margin-top:1rem; font-weight:bold; }
     textarea, input { width:100%; padding:0.75rem; margin-top:0.5rem; border:none; border-radius:0.5rem; background:#000c11; color:#e8f6ff; }
     button { margin-top:1.5rem; width:100%; padding:0.75rem; background:#00e0ff; border:none; border-radius:0.5rem; font-size:1rem; cursor:pointer; }
+    .keypad { display:grid; grid-template-columns:repeat(3, 1fr); gap:0.5rem; margin-top:1rem; }
+    .keypad button { margin-top:0; padding:1rem; background:#062430; font-size:1.2rem; }
     pre { background:#03151c; padding:1rem; border-radius:0.5rem; margin-top:1rem; color:#00ff9c; white-space:pre-wrap; }
     .error { color:#ff4c4c; }
   </style>
@@ -24,6 +26,19 @@
     <textarea id="encrypted" rows="4" placeholder="Paste Fernet token here..."></textarea>
     <label for="password">Password</label>
     <input id="password" type="password" placeholder="mehethohanroi=" />
+    <div class="keypad" id="keypad">
+      <button onclick="pressKey('7')">7</button>
+      <button onclick="pressKey('8')">8</button>
+      <button onclick="pressKey('9')">9</button>
+      <button onclick="pressKey('4')">4</button>
+      <button onclick="pressKey('5')">5</button>
+      <button onclick="pressKey('6')">6</button>
+      <button onclick="pressKey('1')">1</button>
+      <button onclick="pressKey('2')">2</button>
+      <button onclick="pressKey('3')">3</button>
+      <button onclick="pressKey('0')">0</button>
+      <button onclick="clearPassword()">Clear</button>
+    </div>
     <button onclick="doDecrypt()">Giải mã</button>
     <pre id="output"></pre>
   </div>
@@ -46,6 +61,15 @@
         out.textContent = '❌ Decryption failed.';
         out.classList.add('error');
       }
+    }
+
+    function pressKey(val) {
+      const field = document.getElementById('password');
+      field.value += val;
+    }
+
+    function clearPassword() {
+      document.getElementById('password').value = '';
     }
   </script>
 </body>
