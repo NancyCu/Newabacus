@@ -25,7 +25,7 @@
     <label for="encrypted">Encrypted String</label>
     <textarea id="encrypted" rows="4" placeholder="Paste Fernet token here..."></textarea>
     <label for="password">Password</label>
-    <input id="password" type="password" placeholder="mehethohanroi=" />
+    <input id="password" type="password" placeholder="Enter passcode" />
     <div class="keypad" id="keypad">
       <button onclick="pressKey('7')">7</button>
       <button onclick="pressKey('8')">8</button>
@@ -51,7 +51,8 @@
       const out   = document.getElementById('output');
       try {
         const sha   = CryptoJS.SHA256(pwd);
-        const key64 = CryptoJS.enc.Base64.stringify(sha);
+        let key64 = CryptoJS.enc.Base64.stringify(sha);
+        key64 = key64.replace(/\+/g, '-').replace(/\//g, '_');
         const secret = new fernet.Secret(key64);
         const ftoken = new fernet.Token({ secret: secret, token: token, ttl: 0 });
         const msg = ftoken.decode();
