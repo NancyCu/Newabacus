@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Secret Key Tool (Pyodide)</title>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+  <style>
+    body { display:flex; align-items:center; justify-content:center; height:100vh; background:#121212; color:#e8f6ff; font-family:sans-serif; margin:0; }
+    .container { background:#1e1e1e; padding:2rem; border-radius:1rem; width:90%; max-width:420px; box-shadow:0 0 20px rgba(0,224,255,0.2); }
+    h1 { text-align:center; margin-bottom:1rem; }
+    label { display:block; margin-top:1rem; font-weight:bold; }
+    textarea, input { width:100%; padding:0.75rem; margin-top:0.5rem; border:none; border-radius:0.5rem; background:#000c11; color:#e8f6ff; }
+    button { margin-top:1.5rem; width:100%; padding:0.75rem; background:#00e0ff; border:none; border-radius:0.5rem; font-size:1rem; cursor:pointer; }
+    .keypad { display:grid; grid-template-columns:repeat(3, 1fr); gap:0.5rem; margin-top:1rem; }
+    .keypad button { margin-top:0; padding:1rem; background:#062430; font-size:1.2rem; }
+    pre { background:#03151c; padding:1rem; border-radius:0.5rem; margin-top:1rem; color:#00ff9c; white-space:pre-wrap; }
+    .error { color:#ff4c4c; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Secret Key Tool (Pyodide)</h1>
+    <label for="plain">Plain Text</label>
+    <textarea id="plain" rows="3" placeholder="Message or API key..."></textarea>
+    <label for="token">Encrypted Token</label>
+    <textarea id="token" rows="4" placeholder="Paste Fernet token here..."></textarea>
+    <label for="password">Password</label>
+    <input id="password" type="password" placeholder="your password" />
+    <div class="keypad" id="keypad">
+      <button onclick="pressKey('7')">7</button>
+      <button onclick="pressKey('8')">8</button>
+      <button onclick="pressKey('9')">9</button>
+      <button onclick="pressKey('4')">4</button>
+      <button onclick="pressKey('5')">5</button>
+      <button onclick="pressKey('6')">6</button>
+      <button onclick="pressKey('1')">1</button>
+      <button onclick="pressKey('2')">2</button>
+      <button onclick="pressKey('3')">3</button>
+      <button onclick="pressKey('0')">0</button>
+      <button onclick="clearPassword()">Clear</button>
+    </div>
+    <button onclick="encrypt()">Encrypt</button>
+    <button onclick="decrypt()">Decrypt</button>
+    <pre id="output"></pre>
+  </div>
+  <script>
+    let pyodideReady = loadPyodide({indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"});
+    let pyodide = null;
+    async function initPy() {
+      pyodide = await pyodideReady;
+      await pyodide.loadPackage(["micropip"]);
+      await pyodide.runPythonAsync(`
+import micropip
+await micropip.install('cryptography')
+import hashlib, base64
+from cryptography.fernet import Fernet, InvalidToken
+
+def _key(pwd: str) -> bytes:
+    sha = hashlib.sha256(pwd.encode()).digest()
+    return base64.urlsafe_b64encode(sha)
+
+def encrypt_api_key(pwd: str, msg: str) -> str:
+    return Fernet(_key(pwd)).encrypt(msg.encode()).decode()
+
+def decrypt_api_key(pwd: str, token: str) -> str:
+    return Fernet(_key(pwd)).decrypt(token.encode()).decode()
+`);
+    }
+    initPy();
+
+    async function encrypt() {
+      if (!pyodide) return;
+      const pwd = document.getElementById('password').value;
+      const msg = document.getElementById('plain').value;
+      const fn = pyodide.globals.get('encrypt_api_key');
+      const result = fn(pwd, msg);
+      fn.destroy();
+      document.getElementById('token').value = result;
+      document.getElementById('output').textContent = 'Encrypted.';
+    }
+
+    async function decrypt() {
+      if (!pyodide) return;
+      const pwd = document.getElementById('password').value;
+      const token = document.getElementById('token').value.replace(/\s+/g, "");
+      const fn = pyodide.globals.get('decrypt_api_key');
+      try {
+        const result = fn(pwd, token);
+        document.getElementById('plain').value = result;
+        document.getElementById('output').textContent = '🔓 ' + result;
+        document.getElementById('output').classList.remove('error');
+      } catch(e) {
+        document.getElementById('output').textContent = '❌ Decryption failed.';
+        document.getElementById('output').classList.add('error');
+      } finally {
+        fn.destroy();
+      }
+    }
+
+    function pressKey(val) {
+      const field = document.getElementById('password');
+      field.value += val;
+    }
+
+    function clearPassword() {
+      document.getElementById('password').value = '';
+    }
+  </script>
+</body>
+</html>
