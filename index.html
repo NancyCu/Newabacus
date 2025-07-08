@@ -244,16 +244,21 @@
   <div class="container">
     <h1>Calculator</h1>
     
-    <!-- Variables Section -->
+    <!-- Operations Section -->
     <div class="section">
-      <h2 class="section-title">Variables</h2>
+      <h2 class="section-title">Operations</h2>
       <div class="section-content">
-        <label for="varX">X</label>
-        <input id="varX" type="number" placeholder="Enter value for X" />
-        <label for="varY">Y</label>
-        <input id="varY" type="number" placeholder="Enter value for Y" />
-        <label for="varZ">Z</label>
-        <input id="varZ" type="number" placeholder="Enter value for Z" />
+        <div class="operations-grid">
+          <button onclick="performOperation('add')">Plus (+)</button>
+          <button onclick="performOperation('subtract')">Minus (-)</button>
+          <button onclick="performOperation('multiply')">Multiply (×)</button>
+          <button onclick="performOperation('divide')">Divide (÷)</button>
+        </div>
+        <div class="operations-grid" style="margin-top: 0.5rem;">
+          <button onclick="calculate()" style="background: #00ff9c; color: #000c11; font-weight: bold;">= (Equals)</button>
+          <button onclick="solve()" style="background: #ff9c00; color: #000c11; font-weight: bold;">Solve</button>
+        </div>
+        <pre id="output"></pre>
       </div>
     </div>
 
@@ -277,21 +282,16 @@
       </div>
     </div>
 
-    <!-- Operations Section -->
+    <!-- Variables Section -->
     <div class="section">
-      <h2 class="section-title">Operations</h2>
+      <h2 class="section-title">Variables</h2>
       <div class="section-content">
-        <div class="operations-grid">
-          <button onclick="performOperation('add')">Plus (+)</button>
-          <button onclick="performOperation('subtract')">Minus (-)</button>
-          <button onclick="performOperation('multiply')">Multiply (×)</button>
-          <button onclick="performOperation('divide')">Divide (÷)</button>
-        </div>
-        <div class="operations-grid" style="margin-top: 0.5rem;">
-          <button onclick="calculate()" style="background: #00ff9c; color: #000c11; font-weight: bold;">= (Equals)</button>
-          <button onclick="solve()" style="background: #ff9c00; color: #000c11; font-weight: bold;">Solve</button>
-        </div>
-        <pre id="output"></pre>
+        <label for="varX">X</label>
+        <input id="varX" type="number" placeholder="Enter Equation" />
+        <label for="varY">Y</label>
+        <input id="varY" type="number" placeholder="Enter Other" />
+        <label for="varZ">Z</label>
+        <input id="varZ" type="number" placeholder="Enter Solution" />
       </div>
     </div>
   </div>
