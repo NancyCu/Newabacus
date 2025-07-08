@@ -291,7 +291,7 @@
     </div>
   </div>
   <script>
-    let pyodideReady = loadPyodide({indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"});
+    const pyodideReady = loadPyodide({indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"});
     let pyodide = null;
     async function initPy() {
       pyodide = await pyodideReady;
