@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mẹ's Decrypt Tool</title>
+  <title>Mẹ's Encrypt / Decrypt Tool</title>
   <script src="./crypto-js.min.js"></script>
   <script src="./fernet.min.js"></script>
   <style>
@@ -21,7 +21,9 @@
 </head>
 <body>
   <div class="container">
-    <h1>Mẹ's Decrypt</h1>
+    <h1>Mẹ's Encrypt / Decrypt</h1>
+      <label for="plain">Plain Text</label>
+      <textarea id="plain" rows="3" placeholder="Message to encrypt..."></textarea>
     <label for="encrypted">Encrypted String</label>
     <textarea id="encrypted" rows="4" placeholder="Paste Fernet token here..."></textarea>
     <label for="password">Password</label>
@@ -39,10 +41,31 @@
       <button onclick="pressKey('0')">0</button>
       <button onclick="clearPassword()">Clear</button>
     </div>
+      <button onclick="encrypt()">Encrypt</button>
     <button onclick="doDecrypt()">Giải mã</button>
     <pre id="output"></pre>
   </div>
   <script>
+    function encrypt() {
+      const pwd = document.getElementById("password").value;
+      const msg = document.getElementById("plain").value;
+      const out = document.getElementById("output");
+      try {
+        const sha = CryptoJS.SHA256(pwd);
+        let key64 = CryptoJS.enc.Base64.stringify(sha);
+          key64 = key64.replace(/\+/g, "-").replace(/\//g, "_");
+        const secret = new fernet.Secret(key64);
+        const token = new fernet.Token({ secret: secret });
+        const enc = token.encode(msg);
+        document.getElementById("encrypted").value = enc;
+        out.textContent = "Encrypted.";
+        out.classList.remove("error");
+      } catch (err) {
+        out.textContent = "❌ Encryption failed.";
+        out.classList.add("error");
+      }
+    }
+
     function doDecrypt() {
       // grab the token and remove every whitespace char so Fernet.js sees a clean one‑liner
       let token = document.getElementById('encrypted').value;
