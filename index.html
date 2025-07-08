@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mẹ's Encrypt / Decrypt Tool</title>
-  <script src="./crypto-js.min.js"></script>
-  <script src="./fernet.min.js"></script>
+  <title>Calculator</title>
   <style>
     * {
       box-sizing: border-box;
@@ -244,18 +242,23 @@
 </head>
 <body>
   <div class="container">
-    <h1>Mẹ's Encrypt / Decrypt Calculator</h1>
+    <h1>Calculator</h1>
     
-    <!-- Variables to Use Section -->
+    <!-- Operations Section -->
     <div class="section">
-      <h2 class="section-title">Variables to Use</h2>
+      <h2 class="section-title">Operations</h2>
       <div class="section-content">
-        <label for="plain">Plain Text</label>
-        <textarea id="plain" rows="3" placeholder="Message to encrypt..."></textarea>
-        <label for="encrypted">Encrypted String</label>
-        <textarea id="encrypted" rows="4" placeholder="Paste Fernet token here..."></textarea>
-        <label for="password">Password</label>
-        <input id="password" type="password" placeholder="Enter passcode" />
+        <div class="operations-grid">
+          <button onclick="performOperation('add')">Plus (+)</button>
+          <button onclick="performOperation('subtract')">Minus (-)</button>
+          <button onclick="performOperation('multiply')">Multiply (×)</button>
+          <button onclick="performOperation('divide')">Divide (÷)</button>
+        </div>
+        <div class="operations-grid" style="margin-top: 0.5rem;">
+          <button onclick="calculate()" style="background: #00ff9c; color: #000c11; font-weight: bold;">= (Equals)</button>
+          <button onclick="solve()" style="background: #ff9c00; color: #000c11; font-weight: bold;">Solve</button>
+        </div>
+        <pre id="output"></pre>
       </div>
     </div>
 
@@ -274,73 +277,152 @@
           <button onclick="pressKey('2')">2</button>
           <button onclick="pressKey('3')">3</button>
           <button onclick="pressKey('0')">0</button>
-          <button onclick="clearPassword()">Clear</button>
+          <button onclick="clearValue()">Clear</button>
         </div>
       </div>
     </div>
 
-    <!-- Operations Section -->
+    <!-- Variables Section -->
     <div class="section">
-      <h2 class="section-title">Operations</h2>
+      <h2 class="section-title">Variables</h2>
       <div class="section-content">
-        <div class="operations-grid">
-          <button onclick="encrypt()">Encrypt</button>
-          <button onclick="doDecrypt()">Decrypt</button>
-        </div>
-        <pre id="output"></pre>
+        <label for="varX">X</label>
+        <input id="varX" type="number" placeholder="Enter Equation" />
+        <label for="varY">Y</label>
+        <input id="varY" type="number" placeholder="Enter Other" />
+        <label for="varZ">Z</label>
+        <input id="varZ" type="number" placeholder="Enter Solution" />
       </div>
     </div>
   </div>
   <script>
-    function encrypt() {
-      const pwd = document.getElementById("password").value;
-      const msg = document.getElementById("plain").value;
-      const out = document.getElementById("output");
-      try {
-        const sha = CryptoJS.SHA256(pwd);
-        let key64 = CryptoJS.enc.Base64.stringify(sha);
-          key64 = key64.replace(/\+/g, "-").replace(/\//g, "_");
-        const secret = new fernet.Secret(key64);
-        const token = new fernet.Token({ secret: secret });
-        const enc = token.encode(msg);
-        document.getElementById("encrypted").value = enc;
-        out.textContent = "Encrypted.";
-        out.classList.remove("error");
-      } catch (err) {
-        out.textContent = "❌ Encryption failed.";
-        out.classList.add("error");
-      }
+    let currentOperation = null;
+    let currentValue = '';
+    let activeField = null;
+
+    function performOperation(op) {
+      currentOperation = op;
+      const out = document.getElementById('output');
+      const operations = {
+        'add': 'Addition (+)',
+        'subtract': 'Subtraction (-)',
+        'multiply': 'Multiplication (×)',
+        'divide': 'Division (÷)'
+      };
+      out.textContent = `Operation selected: ${operations[op]}`;
+      out.classList.remove('error');
     }
 
-    function doDecrypt() {
-      // grab the token and remove every whitespace char so Fernet.js sees a clean one‑liner
-      let token = document.getElementById('encrypted').value;
-      token = token.replace(/\s+/g, "");
-      const pwd   = document.getElementById('password').value;
-      const out   = document.getElementById('output');
+    function calculate() {
+      const x = parseFloat(document.getElementById('varX').value) || 0;
+      const y = parseFloat(document.getElementById('varY').value) || 0;
+      const z = parseFloat(document.getElementById('varZ').value) || 0;
+      const out = document.getElementById('output');
+      
+      if (!currentOperation) {
+        out.textContent = '⚠️ Please select an operation first';
+        out.classList.add('error');
+        return;
+      }
+      
+      let result;
       try {
-        const sha   = CryptoJS.SHA256(pwd);
-        let key64 = CryptoJS.enc.Base64.stringify(sha);
-        key64 = key64.replace(/\+/g, '-').replace(/\//g, '_');
-        const secret = new fernet.Secret(key64);
-        const ftoken = new fernet.Token({ secret: secret, token: token, ttl: 0 });
-        const msg = ftoken.decode();
-        out.textContent = '🔓 ' + msg;
+        switch(currentOperation) {
+          case 'add':
+            result = x + y;
+            out.textContent = `${x} + ${y} = ${result}`;
+            break;
+          case 'subtract':
+            result = x - y;
+            out.textContent = `${x} - ${y} = ${result}`;
+            break;
+          case 'multiply':
+            result = x * y;
+            out.textContent = `${x} × ${y} = ${result}`;
+            break;
+          case 'divide':
+            if (y === 0) {
+              out.textContent = '❌ Cannot divide by zero';
+              out.classList.add('error');
+              return;
+            }
+            result = x / y;
+            out.textContent = `${x} ÷ ${y} = ${result}`;
+            break;
+        }
         out.classList.remove('error');
       } catch (err) {
-        out.textContent = '❌ Decryption failed.';
+        out.textContent = '❌ Calculation error';
         out.classList.add('error');
       }
     }
 
-    function pressKey(val) {
-      const field = document.getElementById('password');
-      field.value += val;
+    function solve() {
+      const x = parseFloat(document.getElementById('varX').value) || 0;
+      const y = parseFloat(document.getElementById('varY').value) || 0;
+      const z = parseFloat(document.getElementById('varZ').value) || 0;
+      const out = document.getElementById('output');
+      
+      // Simple equation solving example: X + Y = Z, solve for missing variable
+      if (isNaN(x) || document.getElementById('varX').value === '') {
+        const solvedX = z - y;
+        document.getElementById('varX').value = solvedX;
+        out.textContent = `Solved: X = ${solvedX} (where X + Y = Z)`;
+      } else if (isNaN(y) || document.getElementById('varY').value === '') {
+        const solvedY = z - x;
+        document.getElementById('varY').value = solvedY;
+        out.textContent = `Solved: Y = ${solvedY} (where X + Y = Z)`;
+      } else if (isNaN(z) || document.getElementById('varZ').value === '') {
+        const solvedZ = x + y;
+        document.getElementById('varZ').value = solvedZ;
+        out.textContent = `Solved: Z = ${solvedZ} (where X + Y = Z)`;
+      } else {
+        out.textContent = `All variables have values. X=${x}, Y=${y}, Z=${z}`;
+      }
+      out.classList.remove('error');
     }
 
-    function clearPassword() {
-      document.getElementById('password').value = '';
+    function pressKey(val) {
+      // Focus on the first empty field or the last focused field
+      if (!activeField) {
+        if (!document.getElementById('varX').value) {
+          activeField = document.getElementById('varX');
+        } else if (!document.getElementById('varY').value) {
+          activeField = document.getElementById('varY');
+        } else if (!document.getElementById('varZ').value) {
+          activeField = document.getElementById('varZ');
+        } else {
+          activeField = document.getElementById('varX'); // Default to X
+        }
+      }
+      
+      if (activeField) {
+        activeField.value += val;
+      }
     }
+
+    function clearValue() {
+      if (activeField) {
+        activeField.value = '';
+      } else {
+        // Clear all fields
+        document.getElementById('varX').value = '';
+        document.getElementById('varY').value = '';
+        document.getElementById('varZ').value = '';
+        document.getElementById('output').textContent = '';
+      }
+    }
+
+    // Add event listeners to track active field
+    document.getElementById('varX').addEventListener('focus', function() {
+      activeField = this;
+    });
+    document.getElementById('varY').addEventListener('focus', function() {
+      activeField = this;
+    });
+    document.getElementById('varZ').addEventListener('focus', function() {
+      activeField = this;
+    });
   </script>
 </body>
 </html>
