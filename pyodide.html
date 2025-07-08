@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KAYSIO fx-115ES Plus</title>
+  <title>Secret Key Calculator (Pyodide)</title>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -242,23 +243,18 @@
 </head>
 <body>
   <div class="container">
-    <h1>KAYSIO fx-115ES Plus</h1>
+    <h1>Secret Key Calculator (Pyodide)</h1>
     
-    <!-- Operations Section -->
+    <!-- Variables to Use Section -->
     <div class="section">
-      <h2 class="section-title">Operations</h2>
+      <h2 class="section-title">Variables to Use</h2>
       <div class="section-content">
-        <div class="operations-grid">
-          <button onclick="performOperation('add')">Plus (+)</button>
-          <button onclick="performOperation('subtract')">Minus (-)</button>
-          <button onclick="performOperation('multiply')">Multiply (×)</button>
-          <button onclick="performOperation('divide')">Divide (÷)</button>
-        </div>
-        <div class="operations-grid" style="margin-top: 0.5rem;">
-          <button onclick="calculate()" style="background: #00ff9c; color: #000c11; font-weight: bold;">= (Equals)</button>
-          <button onclick="solve()" style="background: #ff9c00; color: #000c11; font-weight: bold;">Solve</button>
-        </div>
-        <pre id="output"></pre>
+        <label for="plain">Plain Text</label>
+        <textarea id="plain" rows="3" placeholder="Message or API key..."></textarea>
+        <label for="token">Encrypted Token</label>
+        <textarea id="token" rows="4" placeholder="Paste Fernet token here..."></textarea>
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="your password" />
       </div>
     </div>
 
@@ -277,151 +273,85 @@
           <button onclick="pressKey('2')">2</button>
           <button onclick="pressKey('3')">3</button>
           <button onclick="pressKey('0')">0</button>
-          <button onclick="clearValue()">Clear</button>
+          <button onclick="clearPassword()">Clear</button>
         </div>
       </div>
     </div>
 
-    <!-- Variables Section -->
+    <!-- Operations Section -->
     <div class="section">
-      <h2 class="section-title">Variables</h2>
+      <h2 class="section-title">Operations</h2>
       <div class="section-content">
-        <label for="varX">X</label>
-        <input id="varX" type="number" placeholder="Enter Equation" />
-        <label for="varY">Y</label>
-        <input id="varY" type="number" placeholder="Enter Other" />
-        <label for="varZ">Z</label>
-        <input id="varZ" type="number" placeholder="Enter Solution" />
+        <div class="operations-grid">
+          <button onclick="encrypt()">Encrypt</button>
+          <button onclick="decrypt()">Decrypt</button>
+        </div>
+        <pre id="output"></pre>
       </div>
     </div>
   </div>
   <script>
-    let currentOperation = null;
-    let activeField = null;
+    let pyodideReady = loadPyodide({indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"});
+    let pyodide = null;
+    async function initPy() {
+      pyodide = await pyodideReady;
+      await pyodide.loadPackage(["micropip"]);
+      await pyodide.runPythonAsync(`
+import micropip
+await micropip.install('cryptography')
+import hashlib, base64
+from cryptography.fernet import Fernet, InvalidToken
 
-    function performOperation(op) {
-      currentOperation = op;
-      const out = document.getElementById('output');
-      const operations = {
-        'add': 'Addition (+)',
-        'subtract': 'Subtraction (-)',
-        'multiply': 'Multiplication (×)',
-        'divide': 'Division (÷)'
-      };
-      out.textContent = `Operation selected: ${operations[op]}`;
-      out.classList.remove('error');
+def _key(pwd: str) -> bytes:
+    sha = hashlib.sha256(pwd.encode()).digest()
+    return base64.urlsafe_b64encode(sha)
+
+def encrypt_api_key(pwd: str, msg: str) -> str:
+    return Fernet(_key(pwd)).encrypt(msg.encode()).decode()
+
+def decrypt_api_key(pwd: str, token: str) -> str:
+    return Fernet(_key(pwd)).decrypt(token.encode()).decode()
+`);
+    }
+    initPy();
+
+    async function encrypt() {
+      if (!pyodide) return;
+      const pwd = document.getElementById('password').value;
+      const msg = document.getElementById('plain').value;
+      const fn = pyodide.globals.get('encrypt_api_key');
+      const result = fn(pwd, msg);
+      fn.destroy();
+      document.getElementById('token').value = result;
+      document.getElementById('output').textContent = 'Encrypted.';
     }
 
-    function calculate() {
-      const x = parseFloat(document.getElementById('varX').value) || 0;
-      const y = parseFloat(document.getElementById('varY').value) || 0;
-      const z = parseFloat(document.getElementById('varZ').value) || 0;
-      const out = document.getElementById('output');
-      
-      if (!currentOperation) {
-        out.textContent = '⚠️ Please select an operation first';
-        out.classList.add('error');
-        return;
-      }
-      
-      let result;
+    async function decrypt() {
+      if (!pyodide) return;
+      const pwd = document.getElementById('password').value;
+      const token = document.getElementById('token').value.replace(/\s+/g, "");
+      const fn = pyodide.globals.get('decrypt_api_key');
       try {
-        switch(currentOperation) {
-          case 'add':
-            result = x + y;
-            out.textContent = `${x} + ${y} = ${result}`;
-            break;
-          case 'subtract':
-            result = x - y;
-            out.textContent = `${x} - ${y} = ${result}`;
-            break;
-          case 'multiply':
-            result = x * y;
-            out.textContent = `${x} × ${y} = ${result}`;
-            break;
-          case 'divide':
-            if (y === 0) {
-              out.textContent = '❌ Cannot divide by zero';
-              out.classList.add('error');
-              return;
-            }
-            result = x / y;
-            out.textContent = `${x} ÷ ${y} = ${result}`;
-            break;
-        }
-        out.classList.remove('error');
-      } catch (err) {
-        out.textContent = '❌ Calculation error';
-        out.classList.add('error');
+        const result = fn(pwd, token);
+        document.getElementById('plain').value = result;
+        document.getElementById('output').textContent = '🔓 ' + result;
+        document.getElementById('output').classList.remove('error');
+      } catch(e) {
+        document.getElementById('output').textContent = '❌ Decryption failed.';
+        document.getElementById('output').classList.add('error');
+      } finally {
+        fn.destroy();
       }
-    }
-
-    function solve() {
-      const x = parseFloat(document.getElementById('varX').value) || 0;
-      const y = parseFloat(document.getElementById('varY').value) || 0;
-      const z = parseFloat(document.getElementById('varZ').value) || 0;
-      const out = document.getElementById('output');
-      
-      // Simple equation solving example: X + Y = Z, solve for missing variable
-      if (isNaN(x) || document.getElementById('varX').value === '') {
-        const solvedX = z - y;
-        document.getElementById('varX').value = solvedX;
-        out.textContent = `Solved: X = ${solvedX} (where X + Y = Z)`;
-      } else if (isNaN(y) || document.getElementById('varY').value === '') {
-        const solvedY = z - x;
-        document.getElementById('varY').value = solvedY;
-        out.textContent = `Solved: Y = ${solvedY} (where X + Y = Z)`;
-      } else if (isNaN(z) || document.getElementById('varZ').value === '') {
-        const solvedZ = x + y;
-        document.getElementById('varZ').value = solvedZ;
-        out.textContent = `Solved: Z = ${solvedZ} (where X + Y = Z)`;
-      } else {
-        out.textContent = `All variables have values. X=${x}, Y=${y}, Z=${z}`;
-      }
-      out.classList.remove('error');
     }
 
     function pressKey(val) {
-      // Focus on the first empty field or the last focused field
-      if (!activeField) {
-        if (!document.getElementById('varX').value) {
-          activeField = document.getElementById('varX');
-        } else if (!document.getElementById('varY').value) {
-          activeField = document.getElementById('varY');
-        } else if (!document.getElementById('varZ').value) {
-          activeField = document.getElementById('varZ');
-        } else {
-          activeField = document.getElementById('varX'); // Default to X
-        }
-      }
-      
-      if (activeField) {
-        activeField.value += val;
-      }
+      const field = document.getElementById('password');
+      field.value += val;
     }
 
-    function clearValue() {
-      if (activeField) {
-        activeField.value = '';
-      } else {
-        // Clear all fields
-        document.getElementById('varX').value = '';
-        document.getElementById('varY').value = '';
-        document.getElementById('varZ').value = '';
-        document.getElementById('output').textContent = '';
-      }
+    function clearPassword() {
+      document.getElementById('password').value = '';
     }
-
-    // Add event listeners to track active field
-    document.getElementById('varX').addEventListener('focus', function() {
-      activeField = this;
-    });
-    document.getElementById('varY').addEventListener('focus', function() {
-      activeField = this;
-    });
-    document.getElementById('varZ').addEventListener('focus', function() {
-      activeField = this;
-    });
   </script>
 </body>
 </html>
