@@ -8,42 +8,33 @@
   <script src="./crypto-js.min.js"></script>
   <script src="./fernet.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-    
-    body { 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      min-height: 100vh; 
-      background: #121212; 
-      color: #e8f6ff; 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      margin: 0; 
+    * { box-sizing: border-box; }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #121212;
+      color: #e8f6ff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
       padding: 1rem;
     }
-    
-    .container { 
-      background: #1e1e1e; 
-      padding: 1.5rem; 
-      border-radius: 1rem; 
-      width: 100%; 
-      max-width: 380px; 
-      box-shadow: 0 0 20px rgba(0,224,255,0.2); 
+    .container {
+      background: #1e1e1e;
+      padding: 2rem;
+      border-radius: 1rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0,224,255,0.2);
     }
-    
-    h1 { 
-      text-align: center; 
-      margin-bottom: 1.5rem; 
-      font-size: 1.5rem;
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.7rem;
       color: #00e0ff;
     }
-    
-    .section {
-      margin-bottom: 1.5rem;
-    }
-    
+    .section { margin-bottom: 1.5rem; }
     .section-title {
       font-size: 1.1rem;
       color: #00e0ff;
@@ -53,193 +44,111 @@
       border-bottom: 2px solid #062430;
       padding-bottom: 0.5rem;
     }
-    
     .section-content {
       background: rgba(6, 36, 48, 0.3);
       padding: 1rem;
       border-radius: 0.5rem;
       border: 1px solid rgba(0, 224, 255, 0.1);
     }
-    
-    label { 
-      display: block; 
-      margin-top: 0.8rem; 
-      font-weight: 600; 
+    label {
+      display: block;
+      margin-top: 0.8rem;
+      font-weight: 600;
       color: #b8e6ff;
       font-size: 0.9rem;
     }
-    
-    label:first-child {
-      margin-top: 0;
-    }
-    
-    textarea, input { 
-      width: 100%; 
-      padding: 0.75rem; 
-      margin-top: 0.5rem; 
-      border: none; 
-      border-radius: 0.5rem; 
-      background: #000c11; 
-      color: #e8f6ff; 
+    label:first-child { margin-top: 0; }
+    textarea, input {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #000c11;
+      color: #e8f6ff;
       font-size: 0.9rem;
       resize: vertical;
     }
-    
     textarea:focus, input:focus {
       outline: 2px solid #00e0ff;
       outline-offset: -2px;
     }
-    
-    .keypad { 
-      display: grid; 
-      grid-template-columns: repeat(3, 1fr); 
-      gap: 0.5rem; 
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
       margin-top: 0;
     }
-    
-    .keypad button { 
-      margin-top: 0; 
-      padding: 1rem; 
-      background: #062430; 
-      border: none; 
-      border-radius: 0.5rem; 
-      font-size: 1.2rem; 
-      color: #e8f6ff; 
+    .keypad button {
+      margin-top: 0;
+      padding: 1rem;
+      background: #062430;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1.2rem;
+      color: #e8f6ff;
       cursor: pointer;
       transition: all 0.2s ease;
     }
-    
     .keypad button:hover {
       background: #0a3542;
       transform: translateY(-2px);
     }
-    
-    .keypad button:active {
-      transform: translateY(0);
-    }
-    
+    .keypad button:active { transform: translateY(0); }
     .operations-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.5rem;
       margin-bottom: 1rem;
     }
-    
-    .operations-grid button { 
-      margin-top: 0; 
-      padding: 0.75rem; 
-      background: #00e0ff; 
-      border: none; 
-      border-radius: 0.5rem; 
-      font-size: 1rem; 
+    .operations-grid button {
+      margin-top: 0;
+      padding: 0.75rem;
+      background: #00e0ff;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
       color: #000c11;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
     }
-    
     .operations-grid button:hover {
       background: #00c4e6;
       transform: translateY(-2px);
     }
-    
-    .operations-grid button:active {
-      transform: translateY(0);
-    }
-    
-    pre { 
-      background: #03151c; 
-      padding: 1rem; 
-      border-radius: 0.5rem; 
-      margin: 0; 
-      color: #00ff9c; 
-      white-space: pre-wrap; 
+    .operations-grid button:active { transform: translateY(0); }
+    pre {
+      background: #03151c;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 0;
+      color: #00ff9c;
+      white-space: pre-wrap;
       font-size: 0.9rem;
       border: 1px solid rgba(0, 255, 156, 0.2);
     }
-    
-    .error { 
-      color: #ff4c4c; 
-      border-color: rgba(255, 76, 76, 0.2);
-    }
-    
-    /* Responsive Design */
+    .error { color: #ff4c4c; border-color: rgba(255, 76, 76, 0.2); }
     @media (min-width: 768px) {
-      .container {
-        max-width: 500px;
-        padding: 2rem;
-      }
-      
-      h1 {
-        font-size: 1.8rem;
-      }
-      
-      .section-title {
-        font-size: 1.2rem;
-      }
-      
-      .section-content {
-        padding: 1.5rem;
-      }
-      
-      .keypad {
-        gap: 0.75rem;
-      }
-      
-      .keypad button {
-        padding: 1.25rem;
-        font-size: 1.3rem;
-      }
-      
-      .operations-grid {
-        gap: 0.75rem;
-      }
-      
-      .operations-grid button {
-        padding: 1rem;
-        font-size: 1.1rem;
-      }
+      .container { max-width: 500px; padding: 2rem; }
+      h1 { font-size: 1.8rem; }
+      .section-title { font-size: 1.2rem; }
+      .section-content { padding: 1.5rem; }
+      .keypad { gap: 0.75rem; }
+      .keypad button { padding: 1.25rem; font-size: 1.3rem; }
+      .operations-grid { gap: 0.75rem; }
+      .operations-grid button { padding: 1rem; font-size: 1.1rem; }
     }
-    
     @media (min-width: 1024px) {
-      .container {
-        max-width: 600px;
-        padding: 2.5rem;
-      }
-      
-      h1 {
-        font-size: 2rem;
-      }
-      
-      .section {
-        margin-bottom: 2rem;
-      }
-      
-      .section-title {
-        font-size: 1.3rem;
-      }
-      
-      .section-content {
-        padding: 2rem;
-      }
-      
-      .keypad {
-        gap: 1rem;
-      }
-      
-      .keypad button {
-        padding: 1.5rem;
-        font-size: 1.4rem;
-      }
-      
-      .operations-grid {
-        gap: 1rem;
-      }
-      
-      .operations-grid button {
-        padding: 1.25rem;
-        font-size: 1.2rem;
-      }
+      .container { max-width: 600px; padding: 2.5rem; }
+      h1 { font-size: 2rem; }
+      .section { margin-bottom: 2rem; }
+      .section-title { font-size: 1.3rem; }
+      .section-content { padding: 2rem; }
+      .keypad { gap: 1rem; }
+      .keypad button { padding: 1.5rem; font-size: 1.4rem; }
+      .operations-grid { gap: 1rem; }
+      .operations-grid button { padding: 1.25rem; font-size: 1.2rem; }
     }
   </style>
 </head>
