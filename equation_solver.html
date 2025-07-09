@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KAYSIO fx-115ES PLUS</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+    .calc {
+      width: 320px;
+      background: #fff;
+      border-radius: 0.75rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    h1 {
+      margin: 0;
+      padding: 1rem;
+      text-align: center;
+      background: #0a0a0a;
+      color: #0cf;
+      font-size: 1.25rem;
+      font-weight: normal;
+    }
+    .main-btns button {
+      display: block;
+      width: 100%;
+      padding: 0.75rem;
+      border: none;
+      background: #e0e0e0;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .main-btns button + button {
+      border-top: 1px solid #ccc;
+    }
+    .display {
+      background: #222;
+      color: #0f0;
+      font-family: monospace;
+      padding: 1rem;
+      text-align: right;
+      font-size: 1.25rem;
+    }
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.25rem;
+      padding: 1rem;
+      background: #d9d9d9;
+    }
+    .keypad button {
+      padding: 1rem;
+      font-size: 1.1rem;
+      border: none;
+      background: #fff;
+      cursor: pointer;
+    }
+    .bottom-row {
+      grid-column: span 3;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.25rem;
+    }
+    .bottom-row button {
+      padding: 1rem;
+      font-size: 1.1rem;
+      background: #0cf;
+      color: #000;
+    }
+    #equation {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: none;
+      border-top: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="calc">
+    <h1>KAYSIO fx-115ES PLUS</h1>
+    <div class="main-btns">
+      <button id="formulas">Formulas / Equations</button>
+      <button id="solve">Solve Equation</button>
+      <button disabled>Answer</button>
+    </div>
+    <div class="display" id="answer">0</div>
+    <input id="equation" type="text" placeholder="Enter equation" />
+    <div class="keypad">
+      <button data-val="7">7</button>
+      <button data-val="8">8</button>
+      <button data-val="9">9</button>
+      <button data-val="4">4</button>
+      <button data-val="5">5</button>
+      <button data-val="6">6</button>
+      <button data-val="1">1</button>
+      <button data-val="2">2</button>
+      <button data-val="3">3</button>
+      <div class="bottom-row">
+        <button id="equals">=</button>
+        <button id="solveBtn">SOLVE</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const eqInput = document.getElementById('equation');
+    document.querySelectorAll('.keypad button[data-val]').forEach(b => {
+      b.addEventListener('click', () => {
+        eqInput.value += b.dataset.val;
+      });
+    });
+    document.getElementById('equals').addEventListener('click', () => {
+      eqInput.value += '=';
+    });
+    function doSolve(){
+      try {
+        const result = eval(eqInput.value);
+        document.getElementById('answer').textContent = result;
+      } catch(e){
+        document.getElementById('answer').textContent = 'Error';
+      }
+    }
+    document.getElementById('solveBtn').addEventListener('click', doSolve);
+    document.getElementById('solve').addEventListener('click', doSolve);
+  </script>
+</body>
+</html>
