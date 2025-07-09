@@ -18,14 +18,14 @@
       color: #e8f6ff;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 1rem;
+      padding: 0.5rem;
     }
     .container {
       background: #1e1e1e;
-      padding: 2rem;
+      padding: 1.5rem;
       border-radius: 1rem;
       width: 100%;
-      max-width: 400px;
+      max-width: 380px;
       box-shadow: 0 0 20px rgba(0,224,255,0.2);
     }
     h1 {
@@ -34,7 +34,7 @@
       font-size: 1.7rem;
       color: #00e0ff;
     }
-    .section { margin-bottom: 1.5rem; }
+    .section { margin-bottom: 1.2rem; }
     .section-title {
       font-size: 1.1rem;
       color: #00e0ff;
@@ -53,9 +53,10 @@
     label {
       display: block;
       margin-top: 0.8rem;
-      font-weight: 600;
-      color: #b8e6ff;
-      font-size: 0.9rem;
+      font-weight: 400;
+      color: #7a9fb8;
+      font-size: 0.8rem;
+      opacity: 0.8;
     }
     label:first-child { margin-top: 0; }
     textarea, input {
@@ -95,6 +96,12 @@
       transform: translateY(-2px);
     }
     .keypad button:active { transform: translateY(0); }
+    .keypad button.highlighted {
+      background: #00c4e6;
+      color: #000c11;
+      box-shadow: 0 0 15px rgba(0, 196, 230, 0.5);
+      transform: translateY(-2px);
+    }
     .operations-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -156,16 +163,15 @@
   <div class="container">
     <h1>Mẹ's Encrypt / Decrypt Calculator</h1>
     
-    <!-- Variables to Use Section -->
+    <!-- Input Fields Section -->
     <div class="section">
-      <h2 class="section-title">Variables to Use</h2>
       <div class="section-content">
         <label for="plain">Plain Text</label>
-        <textarea id="plain" rows="3" placeholder="Message to encrypt..."></textarea>
+        <textarea id="plain" rows="3" placeholder="Enter your message to encrypt..."></textarea>
         <label for="encrypted">Encrypted String</label>
-        <textarea id="encrypted" rows="4" placeholder="Paste Fernet token here..."></textarea>
+        <textarea id="encrypted" rows="4" placeholder="Paste your encrypted token here..."></textarea>
         <label for="password">Password</label>
-        <input id="password" type="password" placeholder="Enter passcode" />
+        <input id="password" type="password" placeholder="Enter your password" />
       </div>
     </div>
 
@@ -196,6 +202,8 @@
         <div class="operations-grid">
           <button onclick="encrypt()">Encrypt</button>
           <button onclick="doDecrypt()">Decrypt</button>
+          <button onclick="copyToken()">Copy Token</button>
+          <button onclick="clearAll()">Clear All</button>
         </div>
         <pre id="output"></pre>
       </div>
@@ -246,10 +254,48 @@
     function pressKey(val) {
       const field = document.getElementById('password');
       field.value += val;
+      
+      // Add highlight effect
+      const buttons = document.querySelectorAll('.keypad button');
+      buttons.forEach(button => {
+        if (button.textContent === val) {
+          button.classList.add('highlighted');
+          setTimeout(() => {
+            button.classList.remove('highlighted');
+          }, 3000);
+        }
+      });
     }
 
     function clearPassword() {
       document.getElementById('password').value = '';
+    }
+
+    function copyToken() {
+      const encryptedField = document.getElementById('encrypted');
+      const output = document.getElementById('output');
+      
+      if (encryptedField.value.trim() === '') {
+        output.textContent = '❌ No token to copy.';
+        output.classList.add('error');
+        return;
+      }
+      
+      navigator.clipboard.writeText(encryptedField.value).then(() => {
+        output.textContent = '📋 Token copied to clipboard!';
+        output.classList.remove('error');
+      }).catch(() => {
+        output.textContent = '❌ Failed to copy token.';
+        output.classList.add('error');
+      });
+    }
+
+    function clearAll() {
+      document.getElementById('plain').value = '';
+      document.getElementById('encrypted').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('output').textContent = '';
+      document.getElementById('output').classList.remove('error');
     }
   </script>
 </body>
